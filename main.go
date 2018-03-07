@@ -52,6 +52,7 @@ func main() {
 		routePrefix         = app.Flag("web.route-prefix", "Prefix for the internal routes of web endpoints.").Default("").String()
 		persistenceFile     = app.Flag("persistence.file", "File to persist metrics. If empty, metrics are only kept in memory.").Default("").String()
 		persistenceInterval = app.Flag("persistence.interval", "The minimum interval at which to write out the persistence file.").Default("5m").Duration()
+		timeToLive          = app.Flag("metric.timetolive", "The TTL for metrics.").Default("2m").Duration()
 	)
 	log.AddFlags(app)
 	app.Version(version.Print("pushgateway"))
@@ -74,7 +75,7 @@ func main() {
 		flags[f.Name] = f.Value.String()
 	}
 
-	ms := storage.NewDiskMetricStore(*persistenceFile, *persistenceInterval, prometheus.DefaultGatherer)
+	ms := storage.NewDiskMetricStore(*persistenceFile, *persistenceInterval, *timeToLive, prometheus.DefaultGatherer)
 
 	// Inject the metric families returned by ms.GetMetricFamilies into the default Gatherer:
 	prometheus.DefaultGatherer = prometheus.Gatherers{
